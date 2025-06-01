@@ -31,7 +31,7 @@ public class AccountController : Controller
         var result = await _autenticacao.AutenticaUsuario(usuarioViewModel);
         if (result is null)
         {
-            
+            return BadRequest("");
         }
     }
 }
