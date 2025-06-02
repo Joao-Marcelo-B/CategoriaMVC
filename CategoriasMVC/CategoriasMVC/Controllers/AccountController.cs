@@ -14,24 +14,35 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Login()
+    public ActionResult Login()
     {
         return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(UsuarioViewModel usuarioViewModel)
+    public async Task<ActionResult> Login(UsuarioViewModel model)
     {
         if (!ModelState.IsValid)
         {
-            ModelState.AddModelError(string.Empty, "Login Inválido...");
-            return View(usuarioViewModel);
+            ModelState.AddModelError(string.Empty, "Login Inválido....");
+            return View(model);
         }
+        var result = await _autenticacao.AutenticaUsuario(model);
 
-        var result = await _autenticacao.AutenticaUsuario(usuarioViewModel);
+
         if (result is null)
         {
-            return BadRequest("Teste");
+            ModelState.AddModelError(string.Empty, "Login Inválido....");
+            return View(model);
         }
+
+        Response.Cookies.Append("X-Access-Token", result.Token!, new CookieOptions()
+        {
+            Secure = true,
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict
+        });
+
+        return Redirect("/");
     }
 }
